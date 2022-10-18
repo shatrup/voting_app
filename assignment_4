@@ -1,0 +1,44 @@
+My obervation ---
+
+1) When we are deleting voting pod
+   Not impact any application wise. We are able to access both web page.
+   Our voting-app pod instace creating new pod after deleting pod.
+   {
+    root@ip-172-31-4-3 example-voting-app]# kubectl delete po vote-94849dc97-qdrjl
+    pod "vote-94849dc97-qdrjl" deleted
+    [root@ip-172-31-4-3 example-voting-app]# kubectl get po -o wide
+    NAME                      READY   STATUS    RESTARTS   AGE   IP                NODE                                             NOMINATED NODE   
+    db-b54cd94f4-qmxjz        1/1     Running   0          35m   192.168.127.95    ip-172-31-13-6.ap-southeast-1.compute.internal   <none>          
+    redis-868d64d78-bqj82     1/1     Running   0          35m   192.168.127.96    ip-172-31-13-6.ap-southeast-1.compute.internal   <none>           
+    result-5d57b59f4b-2sf4v   1/1     Running   0          35m   192.168.127.97    ip-172-31-13-6.ap-southeast-1.compute.internal   <none>           
+    vote-94849dc97-vkjpd      1/1     Running   0          28s   192.168.127.101   ip-172-31-13-6.ap-southeast-1.compute.internal   <none>          
+    worker-dd46d7584-sknxs    1/1     Running   0          35m   192.168.127.99    ip-172-31-13-6.ap-southeast-1.compute.internal   <none>           
+    }
+    
+   
+2). When we are deleting worker pod
+   Not impact any application wise. We are able to access both web page.
+   Our worker pod instace creating new pod after deleting pod.
+   {
+    root@ip-172-31-4-3 example-voting-app]# kubectl delete po worker-dd46d7584-sknxs
+    pod "vote-94849dc97-qdrjl" deleted
+    [root@ip-172-31-4-3 example-voting-app]# kubectl get po -o wide
+    NAME                      READY   STATUS    RESTARTS   AGE   IP                NODE                                             NOMINATED NODE
+   worker-dd46d7584-ggqx5    1/1     Running   0          40s    192.168.127.102   ip-172-31-13-6.ap-southeast-1.compute.internal   <none>         
+  }
+  
+ 3). When we are deleting DB pod
+    a) Impact only Result web page. We are able to access result web page but no dynamic changes are happing. Looks like static page are showing.
+    b) one more observation when are deleting DB pod the we see worker pod going to RESTART count is 1. This is the reason why result page is not working.
+       
+    Our DB pod instace creating new pod after deleting pod.
+    root@ip-172-31-4-3 example-voting-app]# kubectl delete po db-b54cd94f4-qmxjz
+    pod "db-b54cd94f4-qmxjz" deleted
+    [root@ip-172-31-4-3 example-voting-app]# kubectl get po -o wide
+    NAME                      READY   STATUS    RESTARTS   AGE     IP                NODE                                             NOMINATED NODE   READINESS GATES
+    db-b54cd94f4-ghx2x        1/1     Running   0          36s     192.168.127.103   ip-172-31-13-6.ap-southeast-1.compute.internal   <none>           
+    worker-dd46d7584-ggqx5    1/1     Running   1          6m50s   192.168.127.102   ip-172-31-13-6.ap-southeast-1.compute.internal   <none>      
+  
+ 4). Solution of the , We need restart the RESULT pod after deleting the DB pod. Doing this step our result pod are working.
+  
+  
